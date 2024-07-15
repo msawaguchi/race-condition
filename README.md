@@ -1,51 +1,27 @@
-# Qikserve's Race Condition challenge
+# Solution
 
-This challenge consists of solving a recent issue we had in a specific project, where we need to avoid race condition in some scenarios.
+<h4 align="center"><a href="https://race-condition.netlify.app/" target="_blank">Live Preview</a></h4>
+<p align="center">
+  <img src="src/assets/solution.gif" alt="Race Condition Solution">
+</p>
 
-This application will simulate a basket of an online ordering website. This basket have 2 items, and the guest can increase / decrease its quantity.
+## Summary of Changes
+The main changes include:
 
-It also has a "Checkout" button. That button will start the payment proccess.
+ - **Debounce for API Requests**: The lodash library was installed to implement a debounce function (`debounceValidateBasket`). This avoids the race condition by limiting the frequency of API requests to validate the cart.
 
-When clicking on Plus and Minus buttons, the application will pre-calculate the basket's total on client side, to show a real time value to customer, and then will make a request to API to validate its total.
+ - **Maintaining Calculation State**: the variables (`pendingUpdate`, `lastUpdateTotal`, `lastUpdateTimestamp`) was added to track the state of the latest update and ensure the cart total is correctly updated with the latest API response.
+While a request is in progress, if new changes occur, they will be processed after the current request is completed, ensuring the cart state is always consistent!
 
-The total usually doesn't change, thats why we trust on client side calculation too.
+- To **reduce code repetition**, the `updateItemQuantity` function was added abstracting the logic of the `incrementItem` and `decrementItem` functions.
 
-While the total is being validate in API, guests can still keep using application, increasing and decreasing quantities.
-
-While the total is being validate in API, the "Checkout" button should be disabled because we want a confirmation before allowing payments.
-
-# The problem
-If you click fast on click & minus buttons, it won't control those clicks. We will validate the basket in API after 3 seconds... It causes inconsistences in the system as the total could change while customer clicks on "Checkout" button.
-To reproduce:
-- Increase quantity of 1 item
-- While the request is done, click to increase quantity again
-- You will notice another request will be done after 3 seconds and you will be able to click on "Checkout" button while its not done.
-- This could cause inconsistences as the total could change in the middle of a payment
-What we are doing to solve should be transparent to the end user.
-
-## An example of what should not happen.
-- Clicked once on plus button
-- Clicked again on plus button while the first request was in progress
-- The "Checkout" button was enabled between first and second request. Should not be as we knew there would be a second request because the click was while the first one was in progress.
-![race-condition-example](https://github.com/qsengineers/race-condition/assets/134649881/16dca8fd-0eb1-4893-b8d0-8ff23bc58118)
-
-
-# The solution
-You should build a race condition solution to solve this problem.
 ## Solution's rules
-- We don't want to disable Plus & Minus button while the request is being done
-- If i click twice in a Plus or minus button, i want the application to make only 1 request
-- If i click on minus or plus button while the request is being done, another request should be done as soon as the current one finishes
-  - Checkout button should be disabled while those 2 requests are not finished.
-- We need to know the value of response of latest started request.
-  - The latest started request is not always the latest finished request
-
-
-## Deliveries
-- Please deploy the solution in a shared URL so i can see the results without needing to run.
-- Please fork this repository on your account and invite ronaldo.zanoni@qikserve.com, felipe.loge@qikserve.com and caio.ricci@qikserve.com.
-- Open a PR with the changes you needed to do to complete this challenge.
-
+- :white_check_mark: We don't want to disable Plus & Minus button while the request is being done
+- :white_check_mark: If i click twice in a Plus or minus button, i want the application to make only 1 request
+- :white_check_mark: If i click on minus or plus button while the request is being done, another request should be done as soon as the current one finishes
+- :white_check_mark: Checkout button should be disabled while those 2 requests are not finished.
+- :white_check_mark: We need to know the value of response of latest started request.
+- :white_check_mark: The latest started request is not always the latest finished request
 
 ## Project stack
 - Vite
